@@ -1,0 +1,54 @@
+{
+  "questions": [
+    {
+      "id": "vb_1",
+      "round": "Algemene kennis",
+      "type": "multiple-choice",
+      "title": "VOORBEELD — Welk dier is het grootste dier op aarde?",
+      "options": ["Olifant", "Blauwe vinvis", "Giraffe", "Megalodon"],
+      "correctAnswer": "Blauwe vinvis",
+      "points": 10
+    },
+    {
+      "id": "vb_2",
+      "round": "Hitster",
+      "type": "estimate",
+      "title": "VOORBEELD — Uit welk jaar komt dit nummer? (upload eerst een mp3 via Media > Audio)",
+      "min": 1960,
+      "max": 2026,
+      "step": 1,
+      "correctValue": 2000,
+      "points": 10
+    },
+    {
+      "id": "vb_3",
+      "round": "Wereld Geo",
+      "type": "location",
+      "title": "VOORBEELD — Waar is deze foto gemaakt? (klik in de editor op de kaart om de juiste plek te prikken)",
+      "correctLocation": { "lat": 52.3731, "lng": 4.8932, "label": "De Dam, Amsterdam" },
+      "scoringRadiusKm": 150,
+      "perfectRadiusMeters": 5000,
+      "points": 15
+    },
+    {
+      "id": "vb_4",
+      "round": "Schatten maar",
+      "type": "estimate",
+      "title": "VOORBEELD — Hoeveel kilo weegt een volwassen koe ongeveer?",
+      "min": 100,
+      "max": 1500,
+      "step": 10,
+      "unit": "kg",
+      "correctValue": 650,
+      "points": 10
+    },
+    {
+      "id": "vb_5",
+      "round": "Open vragen",
+      "type": "open",
+      "title": "VOORBEELD — Wat is de hoofdstad van Frankrijk? (open vraag: jij keurt de antwoorden goed)",
+      "correctAnswer": "Parijs",
+      "points": 10
+    }
+  ]
+}

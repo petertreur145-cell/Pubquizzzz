@@ -1,0 +1,132 @@
+=====================================================
+  PUBQUIZZZ - LEES DIT EVEN (2 minuten)
+=====================================================
+
+Dit is een complete pubquiz-app voor op je eigen laptop.
+Je vrienden spelen mee op hun telefoon. Je hoeft NIETS te
+installeren - alles zit in deze map.
+
+
+STARTEN
+-------
+1. Dubbelklik op "Start Pubquizzz.bat".
+2. Er opent een zwart venster - LAAT DAT OPEN STAAN.
+3. Je browser opent vanzelf twee tabbladen:
+   - Beamer  = zet dit op de tv/beamer (hier staat de QR-code)
+   - Host    = houd dit zelf, hiermee bestuur je de quiz
+4. Bij de eerste keer starten zet de app de Windows Firewall goed.
+   Windows vraagt daarvoor om toestemming: kies JA / Toestaan
+   (belangrijk! anders kunnen telefoons niet verbinden).
+5. Klaar met spelen? Sluit het zwarte venster.
+
+
+VRIENDEN LATEN MEEDOEN
+----------------------
+- Telefoons moeten op HETZELFDE wifi-netwerk zitten als de laptop
+  (of allemaal op de hotspot van 1 telefoon, laptop ook).
+- Ze scannen de QR-code op het beamer-scherm, kiezen een naam en
+  een poppetje, en doen mee.
+
+SLIM: op de Host-pagina staat een blokje "Wifi-QR op beamer".
+Vul daar de wifi-naam en het wachtwoord in - dan komen er TWEE
+QR-codes op de beamer: scan 1 = telefoon verbindt automatisch
+met de wifi, scan 2 = meedoen. Niemand hoeft dan een wachtwoord
+in te typen.
+
+
+JE EIGEN QUIZ MAKEN
+-------------------
+Er zitten 5 voorbeeldvragen in (1 van elk type) zodat je ziet hoe
+het werkt. Zo maak je je eigen quiz:
+
+1. Start de app en ga naar:  http://localhost:3001/host/editor
+2. Klik links op een vraag om hem te bewerken, of maak een nieuwe
+   met de knoppen bovenaan ("Meerkeuze", "GeoGuessr", enz.)
+3. Per vraagtype:
+   - MEERKEUZE: typ de antwoorden (1 per regel) en kies de juiste.
+   - OPEN VRAAG: typ het juiste antwoord; tijdens de quiz keur JIJ
+     de antwoorden goed of fout (leuk voor persoonlijke vragen).
+   - SCHATTING (slider): kies minimum, maximum en de juiste waarde.
+   - HITSTER (muziek raden): maak een Schatting-vraag, zet de ronde
+     op precies "Hitster", upload een mp3 via Media > Audio, en zet
+     bij "Audio start" het aantal seconden tot vlak voor het refrein.
+     Juiste waarde = het jaar van het nummer.
+   - GEOGUESS (kaart): KLIK GEWOON OP DE KAART om de juiste plek te
+     prikken (coordinaten worden vanzelf ingevuld). "Score-radius km"
+     = binnen hoeveel km je nog punten krijgt (150 voor Nederland,
+     3000 voor de wereld). Zet de ronde op precies "Wereld Geo" voor
+     de wereldkaart-weergave.
+4. FOTO'S: klik "Upload beeld" voor een foto bij de vraag. Kies
+   "Antwoordbeeld" voor een foto die pas bij het antwoord verschijnt
+   (leuk als onthulling!). Met "Fotogrootte op de beamer" maak je de
+   foto Klein / Normaal / Groot.
+5. Klik rechtsboven op "Opslaan in quiz" - klaar!
+
+Tip: de vragen met VOORBEELD in de titel kun je verwijderen zodra
+je je eigen vragen hebt gemaakt.
+
+
+TIJDENS DE QUIZ
+---------------
+- Op de Host-pagina klik je op de grote knop om verder te gaan
+  (vraag openen > uitslag > volgende vraag). Pijltjestoetsen werken ook.
+- Bij open vragen verschijnt een review-scherm waar jij goedkeurt.
+- Aan het einde krijgt iedereen een eindstand met winnaarspodium.
+- Opnieuw beginnen? Knop "Reset" op de Host-pagina.
+
+
+PROBLEMEN?
+----------
+TELEFOON KAN NIET VERBINDEN (QR scannen doet niets / pagina laadt
+niet)? Loop dit lijstje van boven naar beneden af:
+
+0. NIEUWSTE VERSIE? Heb je deze map vaker ontvangen, gebruik dan
+   alleen de nieuwste (de versiedatum staat bovenin het zwarte
+   venster) en verwijder oude Pubquizzz-mappen. Oude versies
+   repareren de firewall niet.
+
+1. FIREWALL. Bij het starten zet de app de Windows Firewall nu
+   automatisch goed. Windows vraagt daarvoor 1x om toestemming:
+   kies JA. Heb je ooit een firewall-vraag weggeklikt, dan
+   blokkeerde Windows stilletjes alle telefoons - deze stap
+   repareert dat. Even opnieuw starten na het klikken op JA.
+   Draait er een extra virusscanner met eigen firewall, zoals
+   Norton of McAfee? Sta node.exe daar toe, of zet die firewall
+   tijdens de quiz even uit.
+
+2. ZELFDE NETWERK? Laptop en telefoon moeten op precies hetzelfde
+   wifi-netwerk zitten. Let op: laptops hangen soms ongemerkt aan
+   een netwerkkabel of een VPN (zeker werklaptops!).
+
+3. WIFI VAN WERK / HOTEL / CAMPING blokkeert bijna altijd het
+   verkeer tussen apparaten onderling (beveiliging). Daar kan de
+   app niets aan doen. Oplossing: de hotspot-truc, zie punt 4.
+
+4. HOTSPOT-TRUC (werkt bijna altijd): zet de hotspot aan op een
+   telefoon. Verbind de LAPTOP met die hotspot - dat vergeten
+   mensen vaak! - en daarna ook alle telefoons. Start de app
+   opnieuw. iPhone-hotspot: zet "Maximale compatibiliteit" aan.
+
+5. HANDMATIG TESTEN: in het zwarte venster staat een adres zoals
+   http://192.168.1.23:3001 - typ dat adres op de telefoon in de
+   browser. Zodra een telefoon de laptop bereikt, verschijnt er
+   in het zwarte venster een [OK]-melding. Zie je die melding
+   niet, dan zit het probleem in het netwerk of de firewall, niet
+   in de app.
+
+6. WERKLAPTOP die door de zaak wordt beheerd? Die blokkeert
+   binnenkomende verbindingen soms volledig (beleid van de IT-
+   afdeling, ook niet te omzeilen). Probeer een prive-laptop.
+
+LET OP: het blokje "Wifi-QR op beamer" op de host-pagina verandert
+niets aan de verbinding. Het zet alleen een extra QR-code op de
+beamer waarmee vrienden zonder wachtwoord-getyp op de wifi komen.
+
+VERDER:
+- Beamer/host-scherm doet raar: druk op F5 (vernieuwen).
+- "Poort 3001 is bezet": er draait al een Pubquizzz - sluit alle
+  zwarte vensters en start opnieuw.
+- Muziek speelt niet vanzelf: klik een keer op de pagina en dan op
+  de afspeelknop (browsers blokkeren automatisch geluid).
+
+Veel plezier!
