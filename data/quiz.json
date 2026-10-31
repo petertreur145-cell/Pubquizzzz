@@ -1,0 +1,382 @@
+{
+  "questions": [
+    {
+      "id": "vb_1",
+      "round": "Algemene kennis",
+      "type": "multiple-choice",
+      "title": "Hoe schrijf je Skopje in het Macedonisch?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783461605318-skopje.webp",
+      "options": [
+        "Стопје",
+        "Скопје",
+        "Дропје"
+      ],
+      "correctAnswer": "Скопје"
+    },
+    {
+      "id": "q_1783462737841_cdptl",
+      "round": "Schatting",
+      "type": "estimate",
+      "title": "Hoeveel inwoners heeft Skopje ongeveer?",
+      "points": 10,
+      "min": 0,
+      "max": 800000,
+      "step": 1000,
+      "correctValue": 550000,
+      "unit": "Inwoners"
+    },
+    {
+      "id": "vb_4",
+      "round": "Schatten maar",
+      "type": "estimate",
+      "title": "Hoeveel standbeelden staan er ongeveer in het centrum van Skopje?",
+      "points": 10,
+      "min": 1,
+      "max": 500,
+      "step": 10,
+      "correctValue": 300,
+      "unit": "stuks"
+    },
+    {
+      "id": "q_1783527397299_2fbpy",
+      "round": "Hitster",
+      "type": "estimate",
+      "title": "Uit welk jaar komt dit nummer?",
+      "points": 10,
+      "audioUrl": "/user-assets/audio/1783527417726-lange-frans-baas-b---het-land-van---live-2005-official-music.mp3",
+      "min": 1960,
+      "max": 2026,
+      "step": 1,
+      "correctValue": 2005,
+      "audioStartSeconds": 10
+    },
+    {
+      "id": "q_1783527401025_yz7ah",
+      "round": "Hitster",
+      "type": "estimate",
+      "title": "Uit welk jaar komt dit nummer?",
+      "points": 10,
+      "audioUrl": "/user-assets/audio/1783527444721-the-opposites-ft-mr-probz---sukkel-voor-de-liefde-prod-by-so.mp3",
+      "min": 1960,
+      "max": 2026,
+      "step": 1,
+      "correctValue": 2013,
+      "audioStartSeconds": 20
+    },
+    {
+      "id": "q_1783525570546_rt6mt",
+      "round": "Open vragen",
+      "type": "open",
+      "title": "Luuk:\nLuuk bezoekt in 2027 eens in de twee weken de kapper. Daarnaast heeft hij 3 bruiloften waarvoor hij zn haar laat knippen. Ook moet hij nog eens per kwartaal zijn balhaar laten trimmen. Een knipbeurt kost €20,00. Hoeveel is hij kwijt p",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783525613711-img_0969.jpeg",
+      "correctAnswer": "€660,00"
+    },
+    {
+      "id": "vb_2",
+      "round": "Algemene kennis",
+      "type": "multiple-choice",
+      "title": "Welk bier wordt hier het meest gedronken in Noord-Macedonië?",
+      "points": 10,
+      "answerImageUrl": "/user-assets/images/1783462427852-skopsko.jpg",
+      "options": [
+        "Heineken",
+        "Skopsko",
+        "Gorsko",
+        "Makedonsko Pivo"
+      ],
+      "correctAnswer": "Skopsko"
+    },
+    {
+      "id": "vb_3",
+      "round": "Algemene kennis",
+      "type": "multiple-choice",
+      "title": "Hoeveel bier wordt hier gemiddeld gedronken in Noord-Macedonië?",
+      "points": 15,
+      "imageUrl": "/user-assets/images/1783462499638-monniken-in-een-kelder-1873-1160x0-c-default.jpg",
+      "options": [
+        "25-35",
+        "35-45",
+        "45-55",
+        "55-65"
+      ],
+      "correctAnswer": "35-45"
+    },
+    {
+      "id": "q_1783548437225_49i5t",
+      "round": "Schatting",
+      "type": "estimate",
+      "title": "Wanneer kwam deze film uit?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783548499076-811lt7khirl-_ac_uf894-1000_ql80_.jpg",
+      "min": 1900,
+      "max": 2026,
+      "step": 1,
+      "correctValue": 1998
+    },
+    {
+      "id": "q_1783549018613_iualr",
+      "round": "Meerkeuze",
+      "type": "multiple-choice",
+      "title": "Wat gebeurde eerder?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783549146558-designer.png",
+      "options": [
+        "De Titanic zonk",
+        "Oreo-koekjes werden verkocht"
+      ],
+      "correctAnswer": "Oreo-koekjes werden verkocht"
+    },
+    {
+      "id": "vb_5",
+      "round": "Open vragen",
+      "type": "open",
+      "title": "Wat is rakija?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783462719574-making-rakija.jpg",
+      "correctAnswer": "Fruitbrandewijn"
+    },
+    {
+      "id": "q_1783462734759_sq1cp",
+      "round": "Meerkeuze",
+      "type": "multiple-choice",
+      "title": "Noord-Macedonië produceert verrassend veel...",
+      "points": 10,
+      "answerImageUrl": "/user-assets/images/1783462808399-fotoma_3.webp",
+      "options": [
+        "Whisky",
+        "Wijn",
+        "Rum",
+        "Bier"
+      ],
+      "correctAnswer": "Wijn"
+    },
+    {
+      "id": "q_1783527399315_7lq43",
+      "round": "Hitster",
+      "type": "estimate",
+      "title": "Uit welk jaar komt dit nummer?",
+      "points": 10,
+      "audioUrl": "/user-assets/audio/1783527438191-the-killers---mr-brightside-official-music-video.mp3",
+      "min": 1960,
+      "max": 2026,
+      "step": 1,
+      "correctValue": 2003
+    },
+    {
+      "id": "q_1783527402091_w0wge",
+      "round": "Hitster",
+      "type": "estimate",
+      "title": "Uit welk jaar komt dit nummer?",
+      "points": 10,
+      "audioUrl": "/user-assets/audio/1783527450795-wildstylez-feat-niels-geusebroek---year-of-summer-official-v.mp3",
+      "min": 1960,
+      "max": 2026,
+      "step": 1,
+      "correctValue": 2012
+    },
+    {
+      "id": "q_1783548559309_962ap",
+      "round": "Schatting",
+      "type": "estimate",
+      "title": "Wanneer kwam deze film uit?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783548587347-pfn_39h4swl2bhg.png",
+      "min": 1900,
+      "max": 2026,
+      "step": 1,
+      "correctValue": 2010
+    },
+    {
+      "id": "q_1783549019583_a6xvj",
+      "round": "Meerkeuze",
+      "type": "multiple-choice",
+      "title": "Wat gebeurde eerder?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783549211909-designer-1.png",
+      "options": [
+        "Oprichting Heineken",
+        "Uitvinding van de telefoon"
+      ],
+      "correctAnswer": "Oprichting Heineken"
+    },
+    {
+      "id": "q_1783462736979_2fa2b",
+      "round": "Open vragen",
+      "type": "open",
+      "title": "Noord-Macedonië staat in Europa bekend om...",
+      "points": 10,
+      "answerImageUrl": "/user-assets/images/1783462852618-01c89ee0-e2ba-11ef-8b56-ceae04020e6b.jpg",
+      "correctAnswer": ""
+    },
+    {
+      "id": "q_1783528312908_gp4os",
+      "round": "Meerkeuze",
+      "type": "multiple-choice",
+      "title": "Hoe zwaar is een gemiddelde drol?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783528323109-img_0965.png",
+      "answerImageUrl": "/user-assets/images/1783544105847-img_1015.png",
+      "options": [
+        "0-100 gram",
+        "100-200 gram",
+        "200-300 gram",
+        "300-400 gram"
+      ],
+      "correctAnswer": "100-200 gram"
+    },
+    {
+      "id": "q_1783542569798_ciq0w",
+      "round": "Schatting",
+      "type": "estimate",
+      "title": "Hoeveel liter water gaat er in een olympisch zwembad?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783544694729-q2-sch-zwembad.jpg",
+      "min": 0,
+      "max": 6000000,
+      "step": 50000,
+      "correctValue": 2500000,
+      "unit": "liter"
+    },
+    {
+      "id": "q_1783542567285_i3yd4",
+      "round": "Hitster",
+      "type": "estimate",
+      "title": "Wanneer kwam dit nummer uit?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783544177890-q2-hit-shakira.jpg",
+      "answerImageUrl": "/user-assets/images/1783544188212-q2-hit-shakira.jpg",
+      "audioUrl": "/user-assets/audio/1783544175316-waka-waka.mp3",
+      "min": 1960,
+      "max": 2026,
+      "step": 1,
+      "correctValue": 2010,
+      "audioStartSeconds": 30
+    },
+    {
+      "id": "q_1783542567995_61cmq",
+      "round": "Hitster",
+      "type": "estimate",
+      "title": "Wanneer kwam dit nummer uit?",
+      "points": 10,
+      "answerImageUrl": "/user-assets/images/1783544421666-q2-hit-luis-fonsi.jpg",
+      "audioUrl": "/user-assets/audio/1783544415542-despacito.mp3",
+      "min": 1960,
+      "max": 2026,
+      "step": 1,
+      "correctValue": 2010,
+      "audioStartSeconds": 20
+    },
+    {
+      "id": "q_1783548714138_xptcq",
+      "round": "Schatting",
+      "type": "estimate",
+      "title": "Wanneer kwam deze film uit?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783548745350-511.webp",
+      "min": 0,
+      "max": 1986,
+      "step": 1,
+      "correctValue": 1986
+    },
+    {
+      "id": "q_1783549030427_wrsxv",
+      "round": "Meerkeuze",
+      "type": "multiple-choice",
+      "title": "Wat gebeurde eerder?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783549315007-designer-2.png",
+      "options": [
+        "De eerste Red Bull",
+        "Google"
+      ],
+      "correctAnswer": "De eerste Red Bull"
+    },
+    {
+      "id": "q_1783528327204_ipq8r",
+      "round": "Schatting",
+      "type": "estimate",
+      "title": "Hoeveel immigranten kwamen er in 2022 naar Nederland?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783528332624-img_0964.png",
+      "min": 0,
+      "max": 500000,
+      "step": 1000,
+      "correctValue": 403000,
+      "unit": "immigranten"
+    },
+    {
+      "id": "q_1783542566353_9on68",
+      "round": "Algemene kennis",
+      "type": "multiple-choice",
+      "title": "Welke kleur heeft de 'zwarte doos' in een vliegtuig?",
+      "points": 10,
+      "answerImageUrl": "/user-assets/images/1783542601681-1783542585438-q2-ken-blackbox.jpg",
+      "options": [
+        "Zwart",
+        "Felgeel",
+        "Feloranje",
+        "Donkerblauw"
+      ],
+      "correctAnswer": "Feloranje"
+    },
+    {
+      "id": "q_1783542569264_1bz4u",
+      "round": "Wereld Geo",
+      "type": "location",
+      "title": "Waar is deze foto gemaakt?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783544666917-q2-geo-golden-gate.jpg",
+      "correctLocation": {
+        "lat": 37.8199,
+        "lng": -122.4783,
+        "label": "Golden Gate Bridge, San Francisco"
+      },
+      "scoringRadiusKm": 3000,
+      "perfectRadiusMeters": 20000
+    },
+    {
+      "id": "q_1783549031417_p98ru",
+      "round": "Meerkeuze",
+      "type": "multiple-choice",
+      "title": "Wat gebeurde eerder?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783549383226-designer-3.png",
+      "options": [
+        "Eerste vliegtuig",
+        "Eerste pornofilm"
+      ],
+      "correctAnswer": "Eerste pornofilm"
+    },
+    {
+      "id": "q_1783542568657_4mmqn",
+      "round": "Schatting",
+      "type": "estimate",
+      "title": "Hoe lang is de Chinese Muur?",
+      "points": 10,
+      "imageUrl": "/user-assets/images/1783544461785-q2-sch-muur.jpg",
+      "min": 0,
+      "max": 50000,
+      "step": 1,
+      "correctValue": 21196,
+      "unit": "kilometer"
+    },
+    {
+      "id": "q_1783524883020_n6fa7",
+      "round": "Streetview",
+      "type": "location",
+      "title": "Waar is deze foto gemaakt?",
+      "points": 15,
+      "imageUrl": "/user-assets/images/1783525017703-shipyard-vraag.png",
+      "correctLocation": {
+        "lat": 44.871985,
+        "lng": 13.845485,
+        "label": "Juiste plek"
+      },
+      "scoringRadiusKm": 0.5,
+      "perfectRadiusMeters": 100
+    }
+  ],
+  "savedAt": "2026-10-31T22:15:45.677Z"
+}

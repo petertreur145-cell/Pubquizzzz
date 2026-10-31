@@ -1,0 +1,13 @@
+{
+  "name": "Pubquizzz",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "onCreateCommand": "cd app && npm ci --omit=dev --no-audit --no-fund",
+  "postStartCommand": "bash .devcontainer/start.sh",
+  "forwardPorts": [3001],
+  "portsAttributes": {
+    "3001": { "label": "Pubquizzz", "onAutoForward": "silent" }
+  },
+  "customizations": {
+    "codespaces": { "openFiles": ["START-HIER.md"] }
+  }
+}
