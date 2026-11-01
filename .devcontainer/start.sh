@@ -8,7 +8,7 @@ LOG=/tmp/pubquizzz.log
 
 if ! curl -fs "http://localhost:$PORT/api/health" >/dev/null 2>&1; then
   [ -d "$ROOT/app/node_modules" ] || (cd "$ROOT/app" && npm ci --omit=dev --no-audit --no-fund)
-  DATA_DIR="$ROOT/data" PORT=$PORT setsid nohup node "$ROOT/app/server/index.js" >"$LOG" 2>&1 < /dev/null &
+  DATA_DIR="$ROOT/data" PORT=$PORT setsid nohup node --watch "$ROOT/app/server/index.js" >"$LOG" 2>&1 < /dev/null &
 fi
 
 for i in $(seq 1 30); do
@@ -27,9 +27,19 @@ else
 fi
 
 cat > "$ROOT/START-HIER.md" <<MD
-# Pubquizzz draait! 🎉
+# Pubquizzz & Spellenkast draaien! 🎉
 
 Houd **Ctrl** (Mac: **Cmd**) ingedrukt en klik op een link:
+
+## 🕹️ Spellenkast (10 party-games, telefoon = controller)
+
+| Wat | Link |
+|---|---|
+| 📺 **Spellenkast op de tv/beamer** | $BASE/arcade |
+
+Spelers scannen de QR-code op dat scherm. De eerste speler (👑) kiest het spel op zijn telefoon.
+
+## ❓ Pubquiz
 
 | Wat | Link |
 |---|---|

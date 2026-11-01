@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Controller</title>
+<style>
+  :root { --bg:#0b1020; --panel:#151c33; --text:#f1f5f9; --muted:#94a3b8; --me:#3b82f6; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; overflow:hidden;
+    overscroll-behavior:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+  #app { position:fixed; inset:0; display:flex; flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  header { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--panel);
+    border-bottom:4px solid var(--me); flex:0 0 auto; }
+  header .emo { font-size:28px; }
+  header .name { font-weight:800; font-size:18px; }
+  header .msg { margin-left:auto; color:var(--muted); font-size:14px; text-align:right; }
+  header button { margin-left:8px; background:#334155; color:#fff; border:0; border-radius:10px; padding:8px 10px; font-weight:700; font-size:13px; }
+  main { flex:1 1 auto; position:relative; touch-action:none; min-height:0; }
+  .center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center; gap:14px; }
+  .big { font-size:72px; }
+  .wait-text { font-size:22px; font-weight:700; line-height:1.3; }
+  .sub { color:var(--muted); font-size:15px; }
+  .grid { position:absolute; inset:0; display:grid; gap:12px; padding:14px; }
+  .btn { border:0; border-radius:22px; color:#fff; font-weight:900; font-size:clamp(18px,6vw,34px);
+    display:flex; align-items:center; justify-content:center; text-align:center; padding:6px;
+    box-shadow:0 8px 0 rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.25); touch-action:none;
+    transition:transform .05s, box-shadow .05s; text-shadow:0 2px 0 rgba(0,0,0,.3); }
+  .btn.down { transform:translateY(6px); box-shadow:0 2px 0 rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.2); filter:brightness(1.15); }
+  .split { position:absolute; inset:0; display:flex; }
+  .stickzone { flex:1.2; position:relative; touch-action:none; border-right:2px dashed #233056; }
+  .stickzone .hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#334155; font-weight:800; font-size:18px; text-align:center; pointer-events:none; }
+  .knob-base { position:absolute; width:150px; height:150px; margin:-75px 0 0 -75px; border-radius:50%;
+    border:3px solid #475569; background:rgba(71,85,105,.25); pointer-events:none; }
+  .knob { position:absolute; width:70px; height:70px; margin:-35px 0 0 -35px; border-radius:50%; background:var(--me);
+    box-shadow:0 4px 12px rgba(0,0,0,.5); pointer-events:none; }
+  .btnzone { flex:1; position:relative; }
+  .dpad { position:absolute; inset:0; display:grid; grid-template-columns:1fr 1fr 1fr; grid-template-rows:1fr 1fr 1fr; gap:10px; padding:14px; max-width:520px; margin:auto; }
+  .menu { position:absolute; inset:0; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px; touch-action:pan-y; }
+  .menu h2 { margin:4px 0 6px; font-size:20px; }
+  .item { display:flex; align-items:center; gap:14px; background:var(--panel); border:2px solid #24304f; border-radius:16px; padding:12px 14px; color:#fff; text-align:left; font-size:17px; font-weight:800; }
+  .item .e { font-size:30px; }
+  .item small { display:block; color:var(--muted); font-weight:500; font-size:13px; margin-top:2px; }
+  .item:active { background:#1e2a4d; }
+  .joinwrap { position:absolute; inset:0; overflow-y:auto; display:flex; padding:18px; touch-action:pan-y; }
+  form { width:100%; max-width:380px; display:flex; flex-direction:column; gap:12px; margin:auto; text-align:center; }
+  input { font-size:22px; padding:14px; border-radius:14px; border:2px solid #334155; background:#0f172a; color:#fff; text-align:center; font-weight:700; }
+  .emojis { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
+  .emojis button { font-size:30px; padding:6px 0; border-radius:12px; border:2px solid transparent; background:#151c33; }
+  .emojis button.sel { border-color:#facc15; background:#2a2f4f; }
+  .go { background:#22c55e; color:#04130a; font-size:24px; font-weight:900; border:0; border-radius:16px; padding:16px; box-shadow:0 6px 0 #15803d; }
+  .err { color:#fca5a5; font-weight:700; min-height:1.2em; }
+  .rotate { position:fixed; left:50%; bottom:10px; transform:translateX(-50%); background:#1e293b; color:#cbd5e1; font-size:13px; padding:6px 12px; border-radius:20px; pointer-events:none; opacity:.9; }
+  @media (orientation:landscape) { .rotate { display:none; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hdr" hidden>
+    <span class="emo" id="hEmo">🙂</span><span class="name" id="hName">Speler</span>
+    <span class="msg" id="hMsg"></span><span id="hExtra"></span>
+  </header>
+  <main id="main"></main>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(() => {
+  const EMOJIS = ["🐸","🦊","🐼","🐯","🐵","🦄","🐙","🐔","🐷","🐶","🐱","🐻","👽","🤖","👻","💀","🎃","🤠","😎","🥸","🦖","🐧","🦉","🍕"];
+  const $ = (s) => document.querySelector(s);
+  const main = $("#main");
+  let token = null, me = null, layout = null, connected = false, lastKey = "";
+  const heldIds = new Set();
+  const press = (id) => { heldIds.add(id); send(id, 1); };
+  const release = (id) => { heldIds.delete(id); send(id, 0); };
+  try { token = localStorage.getItem("arcade-token"); } catch (e) {}
+  if (!token) { token = Math.random().toString(36).slice(2) + Date.now().toString(36); try { localStorage.setItem("arcade-token", token); } catch (e) {} }
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem("arcade-me") || "{}"); } catch (e) {}
+
+  const socket = io("/arcade", { transports: ["websocket", "polling"] });
+  const send = (k, v, extra) => socket.emit("in", Object.assign({ k, v }, extra || {}));
+  const vib = (ms) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+
+  let wakeLock = null;
+  async function keepAwake() { try { if ("wakeLock" in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => { wakeLock = null; }); } } catch (e) {} }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") keepAwake(); });
+
+  function join(name, emoji) {
+    socket.emit("pad:join", { token, name, emoji }, (res) => {
+      if (!res || !res.ok) { showJoin(res && res.error); return; }
+      me = { id: res.id, name, emoji, color: res.color };
+      try { localStorage.setItem("arcade-me", JSON.stringify({ name, emoji })); } catch (e) {}
+      document.documentElement.style.setProperty("--me", res.color);
+      $("#hdr").hidden = false; $("#hEmo").textContent = emoji; $("#hName").textContent = name;
+      keepAwake();
+      render(layout || { type: "wait", text: "Je doet mee! Kijk naar het grote scherm." });
+    });
+  }
+
+  function showJoin(error) {
+    me = null; layout = null; lastKey = ""; $("#hdr").hidden = true;
+    let pick = saved.emoji || EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+    main.innerHTML = `<div class="joinwrap"><form id="jf">
+      <div class="big" style="font-size:54px">🕹️</div>
+      <div class="wait-text">Doe mee met de Spellenkast</div>
+      <input id="nm" maxlength="12" placeholder="Jouw naam" autocomplete="off" value="${(saved.name || "").replace(/"/g, "")}">
+      <div class="emojis">${EMOJIS.map((e) => `<button type="button" data-e="${e}" class="${e === pick ? "sel" : ""}">${e}</button>`).join("")}</div>
+      <div class="err">${error || ""}</div>
+      <button class="go" type="submit">Meedoen!</button></form></div>`;
+    main.querySelectorAll(".emojis button").forEach((b) => b.addEventListener("click", () => {
+      pick = b.dataset.e; main.querySelectorAll(".emojis button").forEach((x) => x.classList.toggle("sel", x === b));
+    }));
+    $("#jf").addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const name = $("#nm").value.trim() || "Speler";
+      saved = { name, emoji: pick }; join(name, pick);
+    });
+  }
+
+  function header(l) {
+    $("#hMsg").textContent = l.msg || "";
+    const extra = $("#hExtra"); extra.innerHTML = "";
+    if (l.quit) {
+      const b = document.createElement("button"); b.textContent = "⏹ Stop";
+      b.onclick = () => { if (confirm("Spel stoppen en terug naar het menu?")) send("quit", 1); };
+      extra.appendChild(b);
+    }
+  }
+
+  function makeButton(def, onDown, onUp) {
+    const el = document.createElement("button");
+    el.className = "btn"; el.textContent = def.label || def.id;
+    el.style.background = def.color || "#3b82f6";
+    if (def.span) el.style.gridColumn = `span ${def.span}`;
+    if (def.rows) el.style.gridRow = `span ${def.rows}`;
+    if (def.area) el.style.gridArea = def.area;
+    if (def.small) el.style.fontSize = "clamp(14px,4.5vw,22px)";
+    let pressed = 0;
+    const down = (e) => { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (_) {} if (pressed++ === 0) { el.classList.add("down"); vib(12); onDown(); } };
+    const up = (e) => { e.preventDefault(); if (pressed > 0 && --pressed === 0) { el.classList.remove("down"); onUp(); } };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    el.addEventListener("lostpointercapture", (e) => { if (pressed > 0) { pressed = 1; up(e); } });
+    el.addEventListener("contextmenu", (e) => e.preventDefault());
+    return el;
+  }
+
+  function buttonGrid(container, buttons, cols) {
+    const grid = document.createElement("div"); grid.className = "grid";
+    grid.style.gridTemplateColumns = `repeat(${cols || 1}, 1fr)`;
+    buttons.forEach((b) => grid.appendChild(makeButton(b, () => press(b.id), () => release(b.id))));
+    container.appendChild(grid);
+  }
+
+  function stick(container) {
+    const zone = document.createElement("div"); zone.className = "stickzone";
+    zone.innerHTML = `<div class="hint">Sleep hier<br>met je duim</div>`;
+    const base = document.createElement("div"); base.className = "knob-base"; base.style.display = "none";
+    const knob = document.createElement("div"); knob.className = "knob"; knob.style.display = "none";
+    zone.append(base, knob);
+    let active = null, ox = 0, oy = 0, last = 0, lx = 0, ly = 0, timer = null;
+    const R = 60;
+    const emit = (x, y, force) => {
+      const now = performance.now();
+      if (!force && now - last < 33 && Math.abs(x - lx) + Math.abs(y - ly) < 0.25) return;
+      last = now; lx = x; ly = y;
+      socket.emit("in", { k: "stick", v: 1, x: +x.toFixed(2), y: +y.toFixed(2) });
+    };
+    zone.addEventListener("pointerdown", (e) => {
+      if (active !== null) return; e.preventDefault(); active = e.pointerId;
+      try { zone.setPointerCapture(e.pointerId); } catch (_) {}
+      const r = zone.getBoundingClientRect(); ox = e.clientX - r.left; oy = e.clientY - r.top;
+      base.style.left = knob.style.left = ox + "px"; base.style.top = knob.style.top = oy + "px";
+      base.style.display = knob.style.display = "block"; zone.querySelector(".hint").style.display = "none";
+      clearInterval(timer); timer = setInterval(() => emit(lx, ly, true), 250);
+    });
+    zone.addEventListener("pointermove", (e) => {
+      if (e.pointerId !== active) return; e.preventDefault();
+      const r = zone.getBoundingClientRect();
+      let dx = e.clientX - r.left - ox, dy = e.clientY - r.top - oy;
+      const d = Math.hypot(dx, dy); if (d > R) { dx = dx / d * R; dy = dy / d * R; }
+      knob.style.left = ox + dx + "px"; knob.style.top = oy + dy + "px";
+      emit(dx / R, dy / R, false);
+    });
+    const end = (e) => {
+      if (e.pointerId !== active) return; active = null; clearInterval(timer);
+      base.style.display = knob.style.display = "none"; emit(0, 0, true);
+    };
+    zone.addEventListener("pointerup", end); zone.addEventListener("pointercancel", end);
+    container.appendChild(zone);
+  }
+
+  function render(l) {
+    const key = JSON.stringify(Object.assign({}, l, { msg: null, quit: null }));
+    if (layout && key === lastKey && main.childElementCount) { layout = l; header(l); return; }
+    lastKey = key;
+    for (const id of Array.from(heldIds)) release(id);
+    if (layout && layout.type === "stick") socket.emit("in", { k: "stick", v: 1, x: 0, y: 0 });
+    layout = l; header(l);
+    main.innerHTML = "";
+    const t = l.type;
+    if (t === "wait") {
+      main.innerHTML = `<div class="center"><div class="big">${l.emoji || "👀"}</div><div class="wait-text"></div><div class="sub"></div></div>`;
+      main.querySelector(".wait-text").textContent = l.text || "";
+      main.querySelector(".sub").textContent = l.sub || "";
+      if (l.button) {
+        const b = makeButton({ id: l.button.id, label: l.button.label, color: l.button.color || "#22c55e" }, () => press(l.button.id), () => release(l.button.id));
+        b.style.padding = "18px 34px"; main.querySelector(".center").appendChild(b);
+      }
+    } else if (t === "buttons") {
+      buttonGrid(main, l.buttons, l.cols);
+    } else if (t === "stick") {
+      const split = document.createElement("div"); split.className = "split";
+      stick(split);
+      const bz = document.createElement("div"); bz.className = "btnzone";
+      if (l.buttons && l.buttons.length) buttonGrid(bz, l.buttons, 1);
+      split.appendChild(bz); main.appendChild(split);
+      main.insertAdjacentHTML("beforeend", `<div class="rotate">↻ Draai je telefoon voor meer ruimte</div>`);
+    } else if (t === "dpad") {
+      const g = document.createElement("div"); g.className = "dpad";
+      const defs = [{ id: "U", label: "▲", area: "1 / 2" }, { id: "L", label: "◀", area: "2 / 1" }, { id: "R", label: "▶", area: "2 / 3" }, { id: "D", label: "▼", area: "3 / 2" }];
+      defs.forEach((d) => g.appendChild(makeButton(Object.assign({ color: "var(--me)" }, d), () => press(d.id), () => release(d.id))));
+      main.appendChild(g);
+    } else if (t === "menu") {
+      const m = document.createElement("div"); m.className = "menu";
+      if (l.title) { const h = document.createElement("h2"); h.textContent = l.title; m.appendChild(h); }
+      l.items.forEach((it) => {
+        const b = document.createElement("button"); b.className = "item";
+        b.innerHTML = `<span class="e"></span><span><span class="t"></span><small></small></span>`;
+        b.querySelector(".e").textContent = it.emoji || "▶";
+        b.querySelector(".t").textContent = it.label;
+        b.querySelector("small").textContent = it.sub || "";
+        b.addEventListener("click", () => { vib(15); send("pick:" + it.id, 1); });
+        m.appendChild(b);
+      });
+      main.appendChild(m);
+    }
+  }
+
+  socket.on("connect", () => { connected = true; if (saved.name && saved.emoji) join(saved.name, saved.emoji); else showJoin(); });
+  socket.on("disconnect", () => { connected = false; if (me) { $("#hMsg").textContent = "Verbinding kwijt… even geduld"; } });
+  socket.on("layout", (l) => { if (me) render(l); else layout = l; });
+  socket.on("buzz", (ms) => vib(ms));
+  $("#hName").addEventListener("click", () => { if (confirm("Naam of poppetje veranderen?")) showJoin(); });
+  document.addEventListener("gesturestart", (e) => e.preventDefault());
+  document.addEventListener("dblclick", (e) => e.preventDefault());
+})();
+</script>
+</body>
+</html>

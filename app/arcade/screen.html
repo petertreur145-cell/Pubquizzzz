@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spellenkast</title>
+<style>
+  html,body { margin:0; height:100%; background:#05070f; overflow:hidden; }
+  body { display:flex; align-items:center; justify-content:center; }
+  canvas { display:block; cursor:pointer; }
+  #fs { position:fixed; right:14px; bottom:14px; z-index:2; background:rgba(15,23,42,.85); color:#e2e8f0; border:1px solid #334155;
+    border-radius:12px; padding:10px 14px; font:700 15px system-ui,"Segoe UI",sans-serif; cursor:pointer; }
+  #fs:hover { background:#1e293b; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<button id="fs" title="Volledig scherm (F)">⛶ Volledig scherm</button>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/arcade/engine.js"></script>
+<script src="/arcade/games/flap.js"></script>
+<script src="/arcade/games/eggs.js"></script>
+<script src="/arcade/games/maze.js"></script>
+<script src="/arcade/games/c4.js"></script>
+<script src="/arcade/games/snake.js"></script>
+<script src="/arcade/games/tanks.js"></script>
+<script src="/arcade/games/sumo.js"></script>
+<script src="/arcade/games/stroop.js"></script>
+<script src="/arcade/games/sprint.js"></script>
+<script src="/arcade/games/meteor.js"></script>
+<script>ARCADE.start();</script>
+</body>
+</html>

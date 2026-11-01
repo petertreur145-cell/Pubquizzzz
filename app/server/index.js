@@ -5,6 +5,7 @@ import os from "os";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Server } from "socket.io";
+import { setupArcade } from "./arcade.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1568,6 +1569,7 @@ app.get("/api/state", (_req, res) => {
   res.json(publicState());
 });
 app.use(userAssetUrlPrefix, express.static(USER_ASSET_DIR));
+setupArcade(app, io);
 app.use(express.static(distPath));
 app.use((_req, res) => {
   res.sendFile(path.join(distPath, "index.html"));
