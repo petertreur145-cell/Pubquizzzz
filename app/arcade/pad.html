@@ -9,6 +9,7 @@
 <style>
   :root { --bg:#0b1020; --panel:#151c33; --text:#f1f5f9; --muted:#94a3b8; --me:#3b82f6; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  [hidden] { display:none !important; }
   html,body { margin:0; height:100%; background:var(--bg); color:var(--text);
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; overflow:hidden;
     overscroll-behavior:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
@@ -54,6 +55,21 @@
   .emojis button.sel { border-color:#facc15; background:#2a2f4f; }
   .go { background:#22c55e; color:#04130a; font-size:24px; font-weight:900; border:0; border-radius:16px; padding:16px; box-shadow:0 6px 0 #15803d; }
   .err { color:#fca5a5; font-weight:700; min-height:1.2em; }
+  .drawwrap { position:absolute; inset:0; display:flex; flex-direction:column; padding:8px; gap:8px; }
+  .dprompt { display:flex; justify-content:space-between; align-items:center; gap:10px; background:#151c33; border-radius:12px; padding:8px 12px; font-weight:800; font-size:17px; line-height:1.2; }
+  .dp-cd { font-size:24px; color:#facc15; min-width:44px; text-align:right; font-variant-numeric:tabular-nums; }
+  .dmain { flex:1; display:flex; flex-direction:column; gap:8px; min-height:0; }
+  .dbox { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; position:relative; }
+  .dpaper { background:#fff; border-radius:12px; touch-action:none; display:block; box-shadow:0 4px 18px rgba(0,0,0,.4); }
+  .ddone { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:rgba(11,16,32,.72); color:#fff; font-size:26px; font-weight:900; border-radius:12px; text-align:center; }
+  .ddone small { font-size:15px; font-weight:600; color:#cbd5e1; }
+  .dtools { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; align-content:center; }
+  .sw { width:38px; height:38px; border-radius:50%; border:3px solid #334155; padding:0; }
+  .sw.sel { border-color:#fff; transform:scale(1.12); }
+  .tb { min-width:46px; height:42px; border-radius:12px; border:0; background:#334155; color:#fff; font-size:20px; font-weight:800; padding:0 10px; }
+  .tb.sel { background:#64748b; }
+  .tb.go { background:#22c55e; color:#04130a; padding:0 16px; }
+  @media (orientation:landscape) { .dmain { flex-direction:row; } .dtools { width:42%; } }
   .rotate { position:fixed; left:50%; bottom:10px; transform:translateX(-50%); background:#1e293b; color:#cbd5e1; font-size:13px; padding:6px 12px; border-radius:20px; pointer-events:none; opacity:.9; }
   @media (orientation:landscape) { .rotate { display:none; } }
 </style>
@@ -72,7 +88,7 @@
   const EMOJIS = ["🐸","🦊","🐼","🐯","🐵","🦄","🐙","🐔","🐷","🐶","🐱","🐻","👽","🤖","👻","💀","🎃","🤠","😎","🦁","🦖","🐧","🦉","🍕"];
   const $ = (s) => document.querySelector(s);
   const main = $("#main");
-  let token = null, me = null, layout = null, connected = false, lastKey = "", stopStick = null;
+  let token = null, me = null, layout = null, connected = false, lastKey = "", stopStick = null, drawCleanup = null;
   const heldIds = new Set();
   const press = (id) => { heldIds.add(id); send(id, 1); };
   const release = (id) => { heldIds.delete(id); send(id, 0); };
@@ -158,9 +174,9 @@
     container.appendChild(grid);
   }
 
-  function stick(container) {
+  function stick(container, hint) {
     const zone = document.createElement("div"); zone.className = "stickzone";
-    zone.innerHTML = `<div class="hint">Sleep hier<br>met je duim</div>`;
+    zone.innerHTML = `<div class="hint">${hint || "Sleep hier<br>met je duim"}</div>`;
     const base = document.createElement("div"); base.className = "knob-base"; base.style.display = "none";
     const knob = document.createElement("div"); knob.className = "knob"; knob.style.display = "none";
     zone.append(base, knob);
@@ -198,12 +214,75 @@
     container.appendChild(zone);
   }
 
+  // ---------- tekenen ----------
+  function drawPad(l) {
+    const S = 600;
+    const wrap = document.createElement("div"); wrap.className = "drawwrap";
+    wrap.innerHTML = `<div class="dprompt"><span class="dp-t"></span><span class="dp-cd"></span></div>
+      <div class="dmain"><div class="dbox"><canvas class="dpaper" width="${S}" height="${S}"></canvas><div class="ddone" hidden>✅ Ingeleverd!<small>Kijk straks naar het grote scherm</small></div></div><div class="dtools"></div></div>`;
+    main.appendChild(wrap);
+    wrap.querySelector(".dp-t").textContent = "✏️ " + (l.prompt || "Teken iets!");
+    const cd = wrap.querySelector(".dp-cd"), box = wrap.querySelector(".dbox"), done = wrap.querySelector(".ddone");
+    const cv = wrap.querySelector("canvas"), ctx = cv.getContext("2d");
+    ctx.lineCap = ctx.lineJoin = "round";
+    const strokes = []; let cur = null, color = "#111827", size = 9, erasing = false, submitted = false, active = null;
+    const paper = () => { ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, S, S); };
+    const drawStroke = (st) => {
+      ctx.strokeStyle = st.c; ctx.lineWidth = st.w; ctx.beginPath(); ctx.moveTo(st.p[0][0], st.p[0][1]);
+      if (st.p.length === 1) ctx.lineTo(st.p[0][0] + 0.1, st.p[0][1] + 0.1);
+      for (let i = 1; i < st.p.length; i++) ctx.lineTo(st.p[i][0], st.p[i][1]);
+      ctx.stroke();
+    };
+    const redraw = () => { paper(); strokes.forEach(drawStroke); };
+    paper();
+    const fit = () => { const r = box.getBoundingClientRect(); const px = Math.max(120, Math.floor(Math.min(r.width, r.height))); cv.style.width = cv.style.height = px + "px"; };
+    fit(); setTimeout(fit, 60); addEventListener("resize", fit);
+    const pos = (e) => { const r = cv.getBoundingClientRect(); return [Math.round((e.clientX - r.left) / r.width * S), Math.round((e.clientY - r.top) / r.height * S)]; };
+    cv.addEventListener("pointerdown", (e) => {
+      if (submitted || active !== null) return; e.preventDefault(); active = e.pointerId;
+      try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+      cur = { c: erasing ? "#ffffff" : color, w: erasing ? size * 2.5 : size, p: [pos(e)] }; strokes.push(cur); drawStroke(cur);
+    });
+    cv.addEventListener("pointermove", (e) => {
+      if (e.pointerId !== active || !cur) return; e.preventDefault();
+      const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+      for (const ev of (evs.length ? evs : [e])) {
+        const q = pos(ev), last = cur.p[cur.p.length - 1];
+        if (Math.abs(q[0] - last[0]) + Math.abs(q[1] - last[1]) < 2) continue;
+        cur.p.push(q); ctx.strokeStyle = cur.c; ctx.lineWidth = cur.w; ctx.beginPath(); ctx.moveTo(last[0], last[1]); ctx.lineTo(q[0], q[1]); ctx.stroke();
+      }
+    });
+    const endS = (e) => { if (e.pointerId === active) { active = null; cur = null; } };
+    cv.addEventListener("pointerup", endS); cv.addEventListener("pointercancel", endS);
+    // gereedschap
+    const tools = wrap.querySelector(".dtools");
+    const COLS = ["#111827", "#ef4444", "#f97316", "#facc15", "#22c55e", "#3b82f6", "#a855f7", "#ec4899", "#92400e", "#94a3b8"];
+    const sws = [];
+    COLS.forEach((c) => { const b = document.createElement("button"); b.className = "sw" + (c === color ? " sel" : ""); b.style.background = c; b.onclick = () => { color = c; erasing = false; sws.forEach((x) => x.classList.toggle("sel", x === b)); er.classList.remove("sel"); }; sws.push(b); tools.appendChild(b); });
+    const sizes = []; [[4, "•"], [9, "●"], [20, "⬤"]].forEach(([w, lab]) => { const b = document.createElement("button"); b.className = "tb" + (w === size ? " sel" : ""); b.textContent = lab; b.onclick = () => { size = w; sizes.forEach((x) => x.classList.toggle("sel", x === b)); }; sizes.push(b); tools.appendChild(b); });
+    const er = document.createElement("button"); er.className = "tb"; er.textContent = "🧽"; er.title = "Gum"; er.onclick = () => { erasing = !erasing; er.classList.toggle("sel", erasing); }; tools.appendChild(er);
+    const un = document.createElement("button"); un.className = "tb"; un.textContent = "↩"; un.title = "Ongedaan maken"; un.onclick = () => { if (!submitted) { strokes.pop(); redraw(); } }; tools.appendChild(un);
+    const cl = document.createElement("button"); cl.className = "tb"; cl.textContent = "🗑"; cl.title = "Alles wissen"; cl.onclick = () => { if (!submitted && confirm("Alles wissen?")) { strokes.length = 0; redraw(); } }; tools.appendChild(cl);
+    const ok = document.createElement("button"); ok.className = "tb go"; ok.textContent = "✓ Klaar"; ok.onclick = () => submit(); tools.appendChild(ok);
+    const end = Date.now() + (l.secs || 30) * 1000;
+    const submit = () => {
+      if (submitted) return; submitted = true; clearInterval(timer);
+      let img = ""; if (strokes.length) { try { img = cv.toDataURL("image/jpeg", 0.72); } catch (_) {} }
+      socket.emit("pad:data", { kind: "drawing", round: l.id, img });
+      done.hidden = false; cd.textContent = "✓"; vib(40);
+    };
+    const tick = () => { const left = Math.max(0, Math.ceil((end - Date.now()) / 1000)); cd.textContent = left; if (left <= 5 && left > 0) cd.style.color = "#f87171"; if (left <= 0) submit(); };
+    const timer = setInterval(tick, 250); tick();
+    drawCleanup = () => { clearInterval(timer); removeEventListener("resize", fit); if (!submitted && strokes.length) submit(); };
+  }
+
   function render(l) {
     const key = JSON.stringify(Object.assign({}, l, { msg: null, quit: null }));
     if (layout && key === lastKey && main.childElementCount) { layout = l; header(l); return; }
     lastKey = key;
     for (const id of Array.from(heldIds)) release(id);
     if (stopStick) { stopStick(); stopStick = null; }
+    if (drawCleanup) { drawCleanup(); drawCleanup = null; }
     if (layout && layout.type === "stick") socket.emit("in", { k: "stick", v: 1, x: 0, y: 0 });
     layout = l; header(l);
     main.innerHTML = "";
@@ -220,16 +299,18 @@
       buttonGrid(main, l.buttons, l.cols);
     } else if (t === "stick") {
       const split = document.createElement("div"); split.className = "split";
-      stick(split);
-      const bz = document.createElement("div"); bz.className = "btnzone";
-      if (l.buttons && l.buttons.length) buttonGrid(bz, l.buttons, 1);
-      split.appendChild(bz); main.appendChild(split);
+      stick(split, l.hint ? String(l.hint).replace(/</g, "") : "");
+      if (l.buttons && l.buttons.length) { const bz = document.createElement("div"); bz.className = "btnzone"; buttonGrid(bz, l.buttons, 1); split.appendChild(bz); }
+      else split.querySelector(".stickzone").style.borderRight = "0";
+      main.appendChild(split);
       main.insertAdjacentHTML("beforeend", `<div class="rotate">↻ Draai je telefoon voor meer ruimte</div>`);
     } else if (t === "dpad") {
       const g = document.createElement("div"); g.className = "dpad";
       const defs = [{ id: "U", label: "▲", area: "1 / 2" }, { id: "L", label: "◀", area: "2 / 1" }, { id: "R", label: "▶", area: "2 / 3" }, { id: "D", label: "▼", area: "3 / 2" }];
       defs.forEach((d) => g.appendChild(makeButton(Object.assign({ color: "var(--me)" }, d), () => press(d.id), () => release(d.id))));
       main.appendChild(g);
+    } else if (t === "draw") {
+      drawPad(l);
     } else if (t === "menu") {
       const m = document.createElement("div"); m.className = "menu";
       if (l.title) { const h = document.createElement("h2"); h.textContent = l.title; m.appendChild(h); }

@@ -93,6 +93,14 @@ export function setupArcade(app, io) {
       if (activeScreen) nsp.to(activeScreen).emit("in", { p: pid, k: clean(m.k, 16), v: Number(m.v) || 0, x: num(m.x), y: num(m.y) });
     });
 
+    socket.on("pad:data", (m) => {
+      const pid = socket.data.pid;
+      if (!pid || !m || !activeScreen) return;
+      const img = typeof m.img === "string" && m.img.startsWith("data:image/") && m.img.length < 900000 ? m.img : null;
+      if (!img) return;
+      nsp.to(activeScreen).emit("data", { p: pid, kind: clean(m.kind, 16), round: clean(m.round, 40), img });
+    });
+
     socket.on("screen:layout", (msg) => {
       if (!isActive(socket) || !msg) return;
       if (msg.to === "all") {

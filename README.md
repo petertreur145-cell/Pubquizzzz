@@ -1,6 +1,6 @@
 # Pubquizzz & Spellenkast
 
-Pubquiz-app **plus een Spellenkast met 10 party-games**: het grote scherm toont het spel, je telefoon is de controller.
+Pubquiz-app **plus een Spellenkast met 14 party-games**: het grote scherm toont het spel, je telefoon is de controller.
 Draait volledig in de browser via **GitHub Codespaces** — geen terminal, geen installatie. Getest met 7–8 spelers.
 
 ## Starten
@@ -28,6 +28,15 @@ Na elk spel krijgt iedereen punten (1e = 5, 2e = 3, 3e = 2, de rest 1). Kies **�
 | 🎨 Kleurreflex – snel de goede kleur drukken, met strikvragen | 1–8 | 4 kleuren | gedeeld |
 | 🏃 Hordenrace – om en om tikken en over de horden springen | 1–8 | L / R / spring | eigen baan per speler |
 | ☄️ Meteorenregen – zweven en meteoren ontwijken | 1–8 | duim + boost | gedeeld |
+| 🏎️ Rondje Rally – top-down race, 3 rondjes | 1–8 | duim + turbo | gedeeld |
+| 🏓 Pingpong Teams – klassiek pingpong, Team Blauw tegen Team Oranje | 2–8 | ▲ ▼ | gedeeld |
+| ⛳ Minigolf – 3 holes tegelijk, minste slagen wint | 1–8 | duim terugtrekken + loslaten | gedeeld |
+| 🖍️ Tekenfeest – iedereen tekent 30 sec dezelfde opdracht op zijn telefoon, de host kiest de mooiste | 2–8 | tekenen op je telefoon | galerij op tv |
+
+**Tekenfeest:** de opdrachten zijn zelfbedacht (± 60 stuks). Na 30 seconden verschijnen alle tekeningen zonder naam
+op de tv; de host klikt met de muis op de mooiste (of 👑 kiest op de telefoon). Daarna zie je wie wat tekende. 3 rondes.
+
+**Iedereen speelt altijd hetzelfde spel tegelijk** op het grote scherm.
 
 **Waarom geen splitscreen?** Met 7 spelers wordt splitscreen 7 piepkleine vakjes. In één gedeelde arena
 blijft iedereen groot en goed te zien; bij Hordenrace krijgt iedereen een eigen baan.

@@ -194,6 +194,10 @@
       s.order = s.order.filter((d) => d !== k);
     }
   });
+  socket.on("data", (m) => {
+    if (scene !== "play" || !inst || !inst.onData || !roster.some((r) => r.id === m.p)) return;
+    try { inst.onData(m.p, m); } catch (e) { console.error(e); }
+  });
   A.held = (pid, k) => !!inp(pid).held[k];
   A.hit = (pid, k) => { const s = inp(pid); if (s.hits[k] > 0) { s.hits[k]--; return true; } return false; };
   A.stick = (pid) => { const s = inp(pid); return { x: s.sx, y: s.sy }; };
@@ -218,6 +222,7 @@
   const scores = {};
   const online = () => players.filter((p) => p.connected);
   const vipId = () => (online()[0] || {}).id;
+  A.vip = () => vipId();
   A.toast = (m) => { toastMsg = m; toastT = 3.5; };
 
   function menuPadFor(p) {
@@ -337,7 +342,8 @@
   const tiles = [];
   function layoutTiles() {
     tiles.length = 0;
-    const x0 = 450, y0 = 150, cols = 5, gap = 18, w = (1550 - x0 - gap * (cols - 1)) / cols, h = 330;
+    const x0 = 450, y0 = 140, cols = 5, gap = 14, rows = Math.ceil(A.games.length / cols);
+    const w = (1550 - x0 - gap * (cols - 1)) / cols, h = Math.min(330, (712 - gap * (rows - 1)) / rows);
     A.games.forEach((d, i) => tiles.push({ d, x: x0 + (i % cols) * (w + gap), y: y0 + Math.floor(i / cols) * (h + gap), w, h }));
   }
   let mouse = { x: -1, y: -1 };
@@ -398,25 +404,29 @@
       gr.addColorStop(0, tl.d.color || "#334155"); gr.addColorStop(1, "#111827");
       g.fillStyle = gr; g.fill();
       g.lineWidth = active ? 5 : 2; g.strokeStyle = active ? "#facc15" : "rgba(255,255,255,.15)"; g.stroke();
-      A.emoji(g, tl.d.emoji, tl.x + tl.w / 2, tl.y + 95 + (active ? Math.sin(t * 6) * 4 : 0), 92);
-      A.txt(g, tl.d.name, tl.x + tl.w / 2, tl.y + 200, { size: tl.d.name.length > 13 ? 22 : 26, align: "center", weight: 900 });
-      wrap(tl.d.tagline, tl.x + tl.w / 2, tl.y + 236, tl.w - 26, 18, "#cbd5e1");
+      const k = tl.h / 330;
+      A.emoji(g, tl.d.emoji, tl.x + tl.w / 2, tl.y + 95 * k + (active ? Math.sin(t * 6) * 4 : 0), 92 * k);
+      A.txt(g, tl.d.name, tl.x + tl.w / 2, tl.y + 200 * k + (k < 1 ? 4 : 0), { size: Math.max(19, (tl.d.name.length > 13 ? 22 : 26) * Math.min(1, k + 0.2)), align: "center", weight: 900 });
+      if (k >= 0.95) wrap(tl.d.tagline, tl.x + tl.w / 2, tl.y + 236, tl.w - 26, 18, "#cbd5e1");
+      else wrap(tl.d.tagline, tl.x + tl.w / 2, tl.y + 200 * k + 32, tl.w - 20, 15, "#cbd5e1", 2);
       const enough = n >= (tl.d.min || 1);
-      A.txt(g, `👥 ${tl.d.min || 1}–${tl.d.max || 8}`, tl.x + tl.w / 2, tl.y + tl.h - 18, { size: 18, align: "center", color: enough ? "#86efac" : "#fca5a5", weight: 700 });
+      A.txt(g, `👥 ${tl.d.min || 1}–${tl.d.max || 8}`, tl.x + tl.w / 2, tl.y + tl.h - 12, { size: k < 1 ? 15 : 18, align: "center", color: enough ? "#86efac" : "#fca5a5", weight: 700 });
       g.restore();
     });
-    if (!ac || ac.state !== "running") A.pill(g, "🔊 Klik ergens voor geluid", 1000, 870, { size: 20 });
-    A.txt(g, "🏆 Eindstand", 450, 885, { size: 20, color: "#facc15", weight: 800 });
-    A.txt(g, "↺ Scores op 0", 610, 885, { size: 18, color: "#94a3b8", weight: 700 });
+    if (!ac || ac.state !== "running") A.pill(g, "🔊 Klik ergens voor geluid", 1060, 884, { size: 17 });
+    A.txt(g, "🏆 Eindstand", 450, 887, { size: 20, color: "#facc15", weight: 800 });
+    A.txt(g, "↺ Scores op 0", 610, 887, { size: 18, color: "#94a3b8", weight: 700 });
     if (players.some((p) => !p.connected)) A.txt(g, "✖ Offline spelers weghalen", 50, 890, { size: 16, color: "#94a3b8", weight: 700 });
   }
-  function wrap(text, x, y, maxW, size, color) {
+  function wrap(text, x, y, maxW, size, color, maxLines = 9) {
     g.font = A.font(size, 600);
-    const words = text.split(" "); let line = "", ly = y;
+    const words = text.split(" "); let line = "", ly = y, lines = 0;
     for (const w of words) {
       const test = line ? line + " " + w : w;
-      if (g.measureText(test).width > maxW && line) { A.txt(g, line, x, ly, { size, weight: 600, align: "center", color }); line = w; ly += size * 1.3; }
-      else line = test;
+      if (g.measureText(test).width > maxW && line) {
+        if (++lines >= maxLines) { A.txt(g, line + "…", x, ly, { size, weight: 600, align: "center", color }); return; }
+        A.txt(g, line, x, ly, { size, weight: 600, align: "center", color }); line = w; ly += size * 1.3;
+      } else line = test;
     }
     if (line) A.txt(g, line, x, ly, { size, weight: 600, align: "center", color });
   }
@@ -503,6 +513,7 @@
   cv.addEventListener("click", (e) => {
     if (inactive) return takeOver();
     const r = cv.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
+    if (scene === "play" && inst && inst.onClick) { try { inst.onClick(x, y); } catch (err) { console.error(err); } return; }
     if (scene === "menu") {
       for (const tl of tiles) if (x > tl.x && x < tl.x + tl.w && y > tl.y && y < tl.y + tl.h) return startGame(tl.d.id);
       if (x < 330 && y > 865) socket.emit("screen:reset");
