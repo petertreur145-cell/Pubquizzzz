@@ -1,3 +1,4 @@
 app/node_modules/
 node/
 data/*.tmp.json
+*.log
