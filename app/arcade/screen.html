@@ -9,7 +9,7 @@
   body { display:flex; align-items:center; justify-content:center; }
   canvas { display:block; cursor:pointer; }
   #fs { position:fixed; right:14px; bottom:14px; z-index:2; background:rgba(15,23,42,.85); color:#e2e8f0; border:1px solid #334155;
-    border-radius:12px; padding:10px 14px; font:700 15px system-ui,"Segoe UI",sans-serif; cursor:pointer; }
+    border-radius:12px; padding:10px 14px; font:700 15px system-ui,"Segoe UI",sans-serif; cursor:pointer; transition:opacity .4s; }
   #fs:hover { background:#1e293b; }
 </style>
 </head>
@@ -17,7 +17,7 @@
 <canvas id="c"></canvas>
 <button id="fs" title="Volledig scherm (F)">⛶ Volledig scherm</button>
 <script src="/socket.io/socket.io.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/arcade/qrcode.min.js"></script>
 <script src="/arcade/engine.js"></script>
 <script src="/arcade/games/flap.js"></script>
 <script src="/arcade/games/eggs.js"></script>

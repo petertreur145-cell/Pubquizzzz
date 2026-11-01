@@ -1,6 +1,6 @@
 // Sumo op ijs – duw elkaar van een smeltende ijsschots. 3 rondes.
 ARCADE.register({
-  id: "sumo", name: "IJs-Sumo", emoji: "🧊", color: "#0891b2",
+  id: "sumo", name: "IJs-Sumo", emoji: "⛸️", color: "#0891b2",
   tagline: "Duw iedereen van de smeltende ijsschots",
   howto: ["Duim links = glijden · DUW! = snelle rammer (even opladen)", "Van het ijs af = af · de schots wordt steeds kleiner", "3 rondes – langer blijven staan = meer punten"],
   min: 2, max: 8,
@@ -96,7 +96,7 @@ ARCADE.register({
           if (b.cd > 0) { g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 4; g.beginPath(); g.arc(b.x, b.y, BR + 7, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - b.cd / 1.5)); g.stroke(); }
           A.label(g, b.p, b.x, b.y - BR - 10, 16);
         }
-        A.pill(g, `Ronde ${round}/${ROUNDS}`, W / 2, 36, { size: 26 });
+        A.pill(g, `Ronde ${round}/${ROUNDS}`, W - 130, 40, { size: 26 });
         balls.forEach((b, i) => { const x = 70 + i * 100; A.avatar(g, b.p, x, 40, 18); A.txt(g, `${b.total}`, x + 26, 50, { size: 22, color: "#bae6fd" }); });
         if (banner > 0) { A.pill(g, bannerText, W / 2, H / 2, { size: 54, bg: "rgba(12,74,110,.92)" }); }
       },

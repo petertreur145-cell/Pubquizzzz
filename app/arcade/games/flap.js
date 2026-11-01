@@ -4,10 +4,10 @@ ARCADE.register({
   tagline: "Fladder door de torens – wie houdt het langst vol?",
   howto: ["Tik op FLADDER om omhoog te gaan", "Raak geen toren en niet de grond", "⭐ = bonus · de laatste vogel in de lucht wint"],
   min: 1, max: 8,
-  pad: { type: "buttons", cols: 1, buttons: [{ id: "A", label: "🪽 FLADDER", color: "#f59e0b" }] },
+  pad: { type: "buttons", cols: 1, buttons: [{ id: "A", label: "⬆ FLADDER", color: "#f59e0b" }] },
   create(A, players) {
     const { W, H } = A, GROUND = H - 70, R = 24, SPACING = 440;
-    const birds = players.map((p, i) => ({ p, x: 230 + i * 44, y: H / 2 - 140 + (i % 4) * 70, vy: 0, alive: true, deathT: 0, stars: 0, wing: 0 }));
+    const birds = players.map((p, i) => ({ p, x: 200 + i * Math.min(64, 420 / Math.max(1, players.length - 1)), y: H / 2 - 150 + (i % 4) * 75, vy: 0, alive: true, deathT: 0, stars: 0, wing: 0 }));
     const cols = [];
     let t = 0, speed = 300, dist = SPACING, lastGap = H / 2, groundX = 0;
     const clouds = Array.from({ length: 7 }, (_, i) => ({ x: i * 260 + A.rand(0, 120), y: A.rand(60, 330), s: A.rand(0.7, 1.4) }));
@@ -88,7 +88,7 @@ ARCADE.register({
           g.fillStyle = "#f97316"; g.beginPath(); g.moveTo(R - 4, -5); g.lineTo(R + 14, 0); g.lineTo(R - 4, 7); g.fill();
           g.restore();
           A.avatar(g, b.p, b.x, b.y, R, { angle: A.clamp(b.vy / 1000, -0.5, 1), alpha: b.alive ? 1 : 0.5 });
-          if (b.alive && t < 6) A.label(g, b.p, b.x, b.y - 36, 15);
+          if (b.alive) A.label(g, b.p, b.x, b.y - 34 - (birds.indexOf(b) % 2) * 16, 14);
         }
         const alive = birds.filter((b) => b.alive).length;
         A.pill(g, `🐤 ${alive} in de lucht`, 130, 34, { size: 22 });

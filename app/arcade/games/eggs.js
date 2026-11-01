@@ -4,7 +4,7 @@ ARCADE.register({
   tagline: "Fladder boven de lava en bekogel elkaar met eieren",
   howto: ["Duim links = vliegen naar links/rechts · FLAP = omhoog", "GOOI = ei gooien (raak = hartje eraf)", "Lava kost ook een hartje · laatste overlevende wint"],
   min: 2, max: 8,
-  pad: { type: "stick", buttons: [{ id: "A", label: "🪽 FLAP", color: "#f59e0b" }, { id: "B", label: "🥚 GOOI", color: "#8b5cf6" }] },
+  pad: { type: "stick", buttons: [{ id: "A", label: "⬆ FLAP", color: "#f59e0b" }, { id: "B", label: "🥚 GOOI", color: "#8b5cf6" }] },
   create(A, players) {
     const { W, H } = A, R = 24, LAVA = H - 60;
     const plats = [{ x: 170, y: 640, w: 270 }, { x: 1160, y: 640, w: 270 }, { x: 665, y: 470, w: 270 }, { x: 90, y: 300, w: 220 }, { x: 1290, y: 300, w: 220 }, { x: 640, y: 190, w: 320 }];

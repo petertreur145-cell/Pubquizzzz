@@ -2,7 +2,7 @@
 ARCADE.register({
   id: "maze", name: "Doolhoftikker", emoji: "🔥", color: "#7c3aed",
   tagline: "Grijp munten in het doolhof en ontwijk de tikker",
-  howto: ["Pijltjes = lopen door het doolhof", "🪙 munten pakken · de tikker 🔥 tikt je → jij bent hem (en -3)", "Wie aan het eind tikker is: -5 · meeste munten wint"],
+  howto: ["Pijltjes = lopen door het doolhof", "💰 munten pakken · de tikker 🔥 tikt je → jij bent hem (en -3)", "Wie aan het eind tikker is: -5 · meeste munten wint"],
   min: 2, max: 8,
   pad: { type: "dpad" },
   create(A, players) {
@@ -49,7 +49,7 @@ ARCADE.register({
     for (let i = 0; i < 50; i++) addCoin();
     let t = 0, coinT = 0;
     const DUR = 90;
-    const padFor = (q) => ({ type: "dpad", msg: q.tagger ? "🔥 JIJ BENT DE TIKKER!" : `🪙 ${q.coins} munten` });
+    const padFor = (q) => ({ type: "dpad", msg: q.tagger ? "🔥 JIJ BENT DE TIKKER!" : `💰 ${q.coins} munten` });
     pls.forEach((q) => A.pad(q.p.id, padFor(q)));
     const game = {
       over: false, ranking: null,
@@ -122,7 +122,7 @@ ARCADE.register({
         sorted.forEach((q, i) => {
           const x = 70 + i * 165;
           A.avatar(g, q.p, x, 48, 20, { glow: q.tagger ? "#ef4444" : null });
-          A.txt(g, `${q.tagger ? "🔥" : "🪙"} ${q.coins}`, x + 28, 57, { size: 24, color: q.tagger ? "#fca5a5" : "#fde68a" });
+          A.txt(g, `${q.tagger ? "🔥" : "💰"} ${q.coins}`, x + 28, 57, { size: 24, color: q.tagger ? "#fca5a5" : "#fde68a" });
         });
       },
     };

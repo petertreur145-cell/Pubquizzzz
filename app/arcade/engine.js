@@ -167,7 +167,12 @@
   const inputs = {};
   const padCache = {};
   const inp = (pid) => inputs[pid] || (inputs[pid] = { held: {}, hits: {}, sx: 0, sy: 0, order: [] });
-  socket.on("connect", () => { socket.emit("screen:hello"); for (const k in padCache) delete padCache[k]; setTimeout(refreshPads, 300); });
+  let inactive = false;
+  socket.on("screen:inactive", () => { inactive = true; });
+  socket.on("screen:active", () => { inactive = false; for (const k in padCache) delete padCache[k]; refreshPads(); });
+  function takeOver() { inactive = false; socket.emit("screen:hello"); setTimeout(() => { for (const k in padCache) delete padCache[k]; refreshPads(); }, 300); }
+  socket.on("scores", (data) => { for (const k in data) if (!(k in scores)) scores[k] = data[k]; });
+  socket.on("connect", () => { inactive = false; socket.emit("screen:hello"); for (const k in padCache) delete padCache[k]; setTimeout(refreshPads, 300); });
   socket.on("players", (list) => {
     players = list;
     for (const p of list) if (!p.connected) { const s = inp(p.id); s.held = {}; s.order = []; s.sx = s.sy = 0; }
@@ -194,7 +199,7 @@
   A.stick = (pid) => { const s = inp(pid); return { x: s.sx, y: s.sy }; };
   A.dir = (pid) => { const o = inp(pid).order; return o.length ? o[o.length - 1] : null; };
   A.buzz = (pid, ms = 80) => socket.emit("screen:buzz", { to: pid, ms });
-  function clearHits() { for (const k in inputs) inputs[k].hits = {}; }
+  function clearHits() { for (const k in inputs) { inputs[k].hits = {}; inputs[k].sx = inputs[k].sy = 0; } }
 
   function sendPad(to, layout) {
     const l = Object.assign({}, layout);
@@ -219,7 +224,8 @@
     if (p.id === vipId()) {
       return { type: "menu", title: "👑 Jij kiest het spel!", msg: `${scores[p.id] || 0} punten`,
         items: [{ id: "random", label: "Verras ons!", emoji: "🎲", sub: "Willekeurig spel" }].concat(
-          A.games.map((d) => ({ id: d.id, label: d.name, emoji: d.emoji, sub: `${d.min > 1 ? d.min + "+ spelers · " : ""}${d.tagline}` }))) };
+          A.games.map((d) => ({ id: d.id, label: d.name, emoji: d.emoji, sub: `${d.min > 1 ? d.min + "+ spelers · " : ""}${d.tagline}` })),
+          [{ id: "final", label: "Eindstand", emoji: "🏆", sub: "Toon het podium met de totaalscores" }]) };
     }
     const vip = players.find((x) => x.id === vipId());
     return { type: "wait", emoji: "⏳", text: `${vip ? vip.name : "De baas"} kiest een spel…`, sub: `Jij hebt ${scores[p.id] || 0} punten`, msg: `${scores[p.id] || 0} punten` };
@@ -229,6 +235,7 @@
       if (!p.connected) continue;
       const inGame = roster.some((r) => r.id === p.id);
       if (scene === "menu") sendPad(p.id, menuPadFor(p));
+      else if (scene === "final") sendPad(p.id, finalPadFor(p));
       else if (!inGame) sendPad(p.id, { type: "wait", emoji: "🍿", text: "Even wachten…", sub: "Bij het volgende spel doe je mee!" });
       else if (scene === "intro" || scene === "play") {
         sendPad(p.id, padCache[p.id] ? JSON.parse(padCache[p.id]) : Object.assign({ msg: current.name }, current.pad));
@@ -238,6 +245,7 @@
 
   function onPick(pid, id) {
     if (scene !== "menu" || pid !== vipId()) return;
+    if (id === "final") return showFinal();
     if (id === "random") {
       const n = online().length;
       const ok = A.games.filter((d) => n >= (d.min || 1));
@@ -247,7 +255,24 @@
     startGame(id);
   }
   function onQuit(pid) { if (pid === vipId() && scene !== "menu") toMenu(); }
-  function onNext(pid) { if (scene === "result" && pid === vipId() && sceneT > 1.5) toMenu(); }
+  function onNext(pid) { if ((scene === "result" || scene === "final") && pid === vipId() && sceneT > 1.5) toMenu(); }
+  function standings() {
+    const ids = players.map((p) => p.id).filter((id) => scores[id] !== undefined || players.find((p) => p.id === id).connected);
+    return A.rankGroups(ids.map((id) => ({ id, key: [scores[id] || 0] })));
+  }
+  function showFinal() {
+    scene = "final"; sceneT = 0; parts.length = 0; A.confetti(200); A.sfx("win");
+    for (const k in padCache) delete padCache[k];
+    refreshPads();
+  }
+  function finalPadFor(p) {
+    const groups = standings(); let place = 1, mine = 0;
+    for (const grp of groups) { if (grp.includes(p.id)) mine = place; place += grp.length; }
+    const l = { type: "wait", emoji: ["🏆", "🥈", "🥉"][mine - 1] || "🎉", text: mine ? `Eindstand: je bent ${mine}e!` : "Eindstand", sub: `${scores[p.id] || 0} punten`, msg: `${scores[p.id] || 0} punten` };
+    if (p.id === vipId()) l.button = { id: "next", label: "Terug naar menu" };
+    return l;
+  }
+  function resetScores() { for (const k in scores) delete scores[k]; socket.emit("screen:scores", scores); for (const k in padCache) delete padCache[k]; refreshPads(); A.toast("Scores staan weer op 0"); }
 
   function startGame(id) {
     const def = A.games.find((d) => d.id === id);
@@ -273,12 +298,14 @@
     if (rest.length) ranking.push(rest);
     let place = 1;
     const rows = [];
+    const team = !!current.team; // teamspel: winnaars 1e (+5), verliezers 2e (+1)
     for (const grp of ranking) {
-      const pts = POINTS[place - 1] || 1;
+      const pts = team ? (place === 1 ? 5 : 1) : POINTS[place - 1] || 1;
       for (const id of grp) { scores[id] = (scores[id] || 0) + pts; rows.push({ id, place, pts, stat: inst.stat ? inst.stat(id) : "" }); }
-      place += grp.length;
+      place += team ? 1 : grp.length;
     }
     result = { rows, game: current };
+    socket.emit("screen:scores", scores);
     scene = "result"; sceneT = 0;
     A.confetti(); A.sfx("win");
     for (const k in padCache) delete padCache[k];
@@ -379,7 +406,9 @@
       g.restore();
     });
     if (!ac || ac.state !== "running") A.pill(g, "🔊 Klik ergens voor geluid", 1000, 870, { size: 20 });
-    if (players.some((p) => !p.connected)) A.txt(g, "🧹 offline spelers weghalen", 50, 890, { size: 16, color: "#64748b", weight: 600 });
+    A.txt(g, "🏆 Eindstand", 450, 885, { size: 20, color: "#facc15", weight: 800 });
+    A.txt(g, "↺ Scores op 0", 610, 885, { size: 18, color: "#94a3b8", weight: 700 });
+    if (players.some((p) => !p.connected)) A.txt(g, "✖ Offline spelers weghalen", 50, 890, { size: 16, color: "#94a3b8", weight: 700 });
   }
   function wrap(text, x, y, maxW, size, color) {
     g.font = A.font(size, 600);
@@ -405,14 +434,17 @@
       A.txt(g, nTxt, W / 2, 850, { size: 110 + f * 30, align: "center", color: "#facc15", stroke: "#0b1020", strokeW: 12, weight: 900, alpha: 1 - f * 0.4 });
     } else A.txt(g, "Pak je telefoon erbij!", W / 2, 830, { size: 34, align: "center", color: "#facc15" });
     // spelers onderin
+    const gap = Math.min(170, 1500 / Math.max(1, roster.length));
     roster.forEach((p, i) => {
-      const x = W / 2 + (i - (roster.length - 1) / 2) * 110;
-      A.avatar(g, p, x, 715 + Math.sin(t * 4 + i) * 6, 32);
+      const x = W / 2 + (i - (roster.length - 1) / 2) * gap;
+      A.avatar(g, p, x, 700 + Math.sin(t * 4 + i) * 6, 32);
+      A.txt(g, p.name, x, 762, { size: 20, align: "center", color: "#e2e8f0", weight: 700 });
     });
   }
 
   function drawResult(t) {
     drawBg(t, "#0b1020", result.game.color || "#1b1446");
+    A.txt(g, "punten   totaal", 1275, 160, { size: 18, align: "right", color: "#94a3b8", weight: 700 });
     A.txt(g, `${result.game.emoji} ${result.game.name} – uitslag`, W / 2, 100, { size: 56, weight: 900, align: "center", stroke: "#0b1020", strokeW: 8 });
     const rows = result.rows;
     const rowH = Math.min(84, 640 / Math.max(1, rows.length));
@@ -428,23 +460,58 @@
       A.avatar(g, p, x + 120, y + (rowH - 10) / 2, (rowH - 10) * 0.38);
       A.txt(g, p.name, x + 170, y + (rowH - 10) / 2, { size: Math.min(34, rowH * 0.45), base: "middle" });
       if (r.stat) A.txt(g, r.stat, x + 620, y + (rowH - 10) / 2, { size: Math.min(26, rowH * 0.35), base: "middle", color: "#cbd5e1", weight: 600, align: "center" });
-      A.txt(g, `+${r.pts}`, x + 970, y + (rowH - 10) / 2, { size: Math.min(36, rowH * 0.48), base: "middle", align: "right", color: "#facc15", weight: 900 });
+      A.txt(g, `+${r.pts}`, x + 880, y + (rowH - 10) / 2, { size: Math.min(36, rowH * 0.48), base: "middle", align: "right", color: "#facc15", weight: 900 });
+      A.txt(g, `${scores[r.id] || 0}`, x + 975, y + (rowH - 10) / 2, { size: Math.min(26, rowH * 0.36), base: "middle", align: "right", color: "#cbd5e1", weight: 700 });
       g.globalAlpha = 1;
     });
     const left = Math.ceil(12 - sceneT);
     A.txt(g, `Terug naar het menu over ${left}… (👑 kan doorklikken)`, W / 2, 870, { size: 22, align: "center", color: "#94a3b8", weight: 600 });
   }
 
+  function drawFinal(t) {
+    drawBg(t, "#0b1020", "#3b0764");
+    A.txt(g, "🏆 Eindstand", W / 2, 110, { size: 76, weight: 900, align: "center", color: "#facc15", stroke: "#0b1020", strokeW: 10 });
+    const groups = standings();
+    const flat = []; let place = 1;
+    for (const grp of groups) { for (const id of grp) flat.push({ id, place }); place += grp.length; }
+    const podium = [[1, 800, 300], [2, 520, 230], [3, 1080, 180]];
+    for (const [pl, x, h] of podium) {
+      const who = flat.filter((f) => f.place === pl);
+      g.fillStyle = ["#facc15", "#cbd5e1", "#d97706"][pl - 1]; A.rr(g, x - 120, 640 - h, 240, h, 14); g.fill();
+      A.txt(g, String(pl), x, 640 - h + 70, { size: 64, align: "center", color: "#0b1020", weight: 900 });
+      who.forEach((f, i) => {
+        const p = players.find((q) => q.id === f.id); if (!p) return;
+        const px = x + (i - (who.length - 1) / 2) * 90, py = 640 - h - 60 - Math.abs(Math.sin(t * 3 + i)) * 12;
+        A.avatar(g, p, px, py, 44);
+        A.txt(g, p.name, px, py - 58, { size: 26, align: "center", stroke: "#0b1020", strokeW: 6 });
+        if (i === 0) A.txt(g, `${scores[f.id] || 0} pt`, x, 640 - h + 110, { size: 24, align: "center", color: "#0b1020" });
+      });
+    }
+    flat.filter((f) => f.place > 3).forEach((f, i) => {
+      const p = players.find((q) => q.id === f.id); if (!p) return;
+      const x = 300 + (i % 5) * 220, y = 720 + Math.floor(i / 5) * 60;
+      A.txt(g, `${f.place}e`, x - 28, y + 8, { size: 22, color: "#94a3b8", align: "right" });
+      A.avatar(g, p, x, y, 20); A.txt(g, `${p.name} · ${scores[f.id] || 0}`, x + 30, y + 8, { size: 22 });
+    });
+    A.txt(g, "Klik hier, of 👑 tikt op 'Terug naar menu'", W / 2, 875, { size: 20, align: "center", color: "#94a3b8", weight: 600 });
+  }
+
   // ---------- invoer op het grote scherm ----------
+  let lastMove = performance.now();
+  addEventListener("mousemove", () => { lastMove = performance.now(); });
   cv.addEventListener("mousemove", (e) => { const r = cv.getBoundingClientRect(); mouse = { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; });
   cv.addEventListener("click", (e) => {
+    if (inactive) return takeOver();
     const r = cv.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
     if (scene === "menu") {
       for (const tl of tiles) if (x > tl.x && x < tl.x + tl.w && y > tl.y && y < tl.y + tl.h) return startGame(tl.d.id);
-      if (x < 300 && y > 870) socket.emit("screen:reset");
-    } else if (scene === "result" && sceneT > 1.5) toMenu();
+      if (x < 330 && y > 865) socket.emit("screen:reset");
+      if (x > 440 && x < 590 && y > 860) showFinal();
+      if (x > 600 && x < 740 && y > 860 && confirm("Alle scores op 0 zetten?")) resetScores();
+    } else if ((scene === "result" || scene === "final") && sceneT > 1.5) toMenu();
   });
   addEventListener("keydown", (e) => {
+    if (inactive) { if (e.key === "Enter" || e.key === " ") takeOver(); return; }
     if (e.key === "Escape") { if (scene !== "menu") toMenu(); return; }
     if (e.key === "f" || e.key === "F") toggleFs();
     if (scene !== "menu") return;
@@ -461,8 +528,17 @@
   document.addEventListener("fullscreenchange", () => { if (fsBtn) fsBtn.style.display = document.fullscreenElement ? "none" : ""; });
 
   // ---------- hoofdlus ----------
-  let last = performance.now(), clock = 0;
+  let last = performance.now(), clock = 0, frames = 0, busy = 0, statT = performance.now();
+  const stats = { fps: 0, ms: 0, maxMs: 0 };
+  A._debug = {
+    get scene() { return scene; }, get game() { return current && current.id; }, get players() { return players; },
+    get scores() { return scores; }, get vip() { return vipId(); }, get inactive() { return inactive; }, stats,
+    get inst() { return inst; }, start: (id) => startGame(id), menu: () => toMenu(),
+  };
   function frame(now) {
+    frames++;
+    if (now - statT > 1000) { stats.fps = Math.round(frames * 1000 / (now - statT)); stats.ms = +(busy / frames).toFixed(2); frames = 0; busy = 0; statT = now; }
+    const t0 = performance.now();
     const dt = Math.min(0.05, (now - last) / 1000); last = now; clock += dt; sceneT += dt;
     g.setTransform(scale, 0, 0, scale, 0, 0);
     try {
@@ -485,6 +561,9 @@
       } else if (scene === "result") {
         drawResult(clock); stepParts(dt); drawParts();
         if (sceneT > 12) toMenu();
+      } else if (scene === "final") {
+        drawFinal(clock); stepParts(dt); drawParts();
+        if (sceneT > 25) toMenu();
       }
     } catch (err) {
       console.error(err);
@@ -492,6 +571,16 @@
       toMenu();
     }
     if (toastT > 0) { toastT -= dt; A.pill(g, toastMsg, W / 2, 820, { size: 30, bg: "rgba(220,38,38,.9)" }); }
+    if (inactive) {
+      g.fillStyle = "rgba(5,7,15,.88)"; g.fillRect(0, 0, W, H);
+      A.txt(g, "⏸ Dit scherm is gepauzeerd", W / 2, H / 2 - 30, { size: 56, align: "center", weight: 900 });
+      A.txt(g, "De Spellenkast is in een ander venster geopend. Klik hier om hem naar dit scherm te halen.", W / 2, H / 2 + 30, { size: 24, align: "center", color: "#cbd5e1", weight: 600 });
+    }
+    // knop en muis verbergen tijdens het spelen (tenzij je de muis beweegt)
+    const showUi = scene === "menu" || inactive || now - lastMove < 2500;
+    if (fsBtn && !document.fullscreenElement) { fsBtn.style.opacity = showUi ? "1" : "0"; fsBtn.style.pointerEvents = showUi ? "auto" : "none"; }
+    cv.style.cursor = showUi ? "pointer" : "none";
+    const spent = performance.now() - t0; busy += spent; if (spent > stats.maxMs) stats.maxMs = +spent.toFixed(1);
     requestAnimationFrame(frame);
   }
   A.start = () => requestAnimationFrame(frame);

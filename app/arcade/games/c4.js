@@ -3,11 +3,11 @@ ARCADE.register({
   id: "c4", name: "Vier op een Rij", emoji: "🔴", color: "#1d4ed8",
   tagline: "Team Rood tegen Team Geel – om de beurt een schijf",
   howto: ["Jullie spelen in twee teams, iedereen komt aan de beurt", "◀ ▶ = kolom kiezen · ⬇ = laten vallen (15 sec per beurt)", "Vier op een rij (ook schuin) wint! Alleen? Dan speel je tegen de computer"],
-  min: 1, max: 8,
-  pad: { type: "wait", emoji: "🔴", text: "Wacht op je beurt…" },
+  min: 1, max: 8, team: true,
+  pad: { type: "wait", emoji: "⏳", text: "Wacht op je beurt…" },
   create(A, players) {
     const { W, H } = A, COLS = 7, ROWS = 6, CELL = 104, BX = (W - COLS * CELL) / 2, BY = 230;
-    const TEAM = [{ name: "Rood", c: "#ef4444", dark: "#991b1b", e: "🔴" }, { name: "Geel", c: "#facc15", dark: "#a16207", e: "🟡" }];
+    const TEAM = [{ name: "Rood", c: "#ef4444", dark: "#991b1b", e: "❤️" }, { name: "Geel", c: "#facc15", dark: "#a16207", e: "💛" }];
     const order = A.shuffle(players.slice());
     const teams = [[], []];
     order.forEach((p, i) => teams[i % 2].push(p));

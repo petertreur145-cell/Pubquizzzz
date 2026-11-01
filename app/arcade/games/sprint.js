@@ -25,11 +25,11 @@ ARCADE.register({
           r.stumble = Math.max(0, r.stumble - dt);
           for (const [tap, foot] of [[tapL, "L"], [tapR, "R"]]) {
             if (!tap || r.air > 0 || r.stumble > 0) continue;
-            if (r.foot !== foot) { r.v = Math.min(10.5, r.v + 0.75); r.foot = foot; }
+            if (r.foot !== foot) { r.v = Math.min(11, r.v + 0.5); r.foot = foot; }
             else { r.v = Math.max(0, r.v - 0.6); }
           }
           if (jump && r.air <= 0 && r.stumble <= 0) { r.air = 0.6; A.sfx("jump"); }
-          r.v = Math.max(0, r.v - (1.0 + 0.22 * r.v) * dt * (r.air > 0 ? 0.3 : 1));
+          r.v = Math.max(0, r.v - (1.0 + 0.3 * r.v) * dt * (r.air > 0 ? 0.3 : 1));
           const prev = r.d;
           r.d += r.v * dt; r.cycle += r.v * dt * 1.6;
           if (r.air > 0) r.air = Math.max(0, r.air - dt);

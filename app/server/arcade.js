@@ -30,6 +30,9 @@ export function setupArcade(app, io) {
   let seq = 0;
   const layouts = new Map();
   let defaultLayout = { type: "wait", text: "Kijk naar het grote scherm!" };
+  let activeScreen = null; // maar één tv-scherm tegelijk bestuurt het spel
+  let scores = {};
+  const isActive = (socket) => socket.data.screen && socket.id === activeScreen;
 
   const pub = () => players.map(({ id, name, emoji, color, connected }) => ({ id, name, emoji, color, connected }));
   const sendPlayers = () => nsp.to("screens").emit("players", pub());
@@ -45,7 +48,16 @@ export function setupArcade(app, io) {
     socket.on("screen:hello", () => {
       socket.data.screen = true;
       socket.join("screens");
+      if (activeScreen && activeScreen !== socket.id) nsp.to(activeScreen).emit("screen:inactive");
+      activeScreen = socket.id;
       socket.emit("players", pub());
+      socket.emit("scores", scores);
+    });
+
+    socket.on("screen:scores", (data) => {
+      if (!isActive(socket) || !data || typeof data !== "object") return;
+      scores = {};
+      for (const [k, v] of Object.entries(data)) if (/^p\d+$/.test(k) && Number.isFinite(v)) scores[k] = v;
     });
 
     socket.on("pad:join", (data, ack) => {
@@ -78,11 +90,11 @@ export function setupArcade(app, io) {
     socket.on("in", (m) => {
       const pid = socket.data.pid;
       if (!pid || !m) return;
-      nsp.to("screens").emit("in", { p: pid, k: clean(m.k, 16), v: Number(m.v) || 0, x: num(m.x), y: num(m.y) });
+      if (activeScreen) nsp.to(activeScreen).emit("in", { p: pid, k: clean(m.k, 16), v: Number(m.v) || 0, x: num(m.x), y: num(m.y) });
     });
 
     socket.on("screen:layout", (msg) => {
-      if (!socket.data.screen || !msg) return;
+      if (!isActive(socket) || !msg) return;
       if (msg.to === "all") {
         defaultLayout = msg.layout;
         layouts.clear();
@@ -94,16 +106,22 @@ export function setupArcade(app, io) {
     });
 
     socket.on("screen:buzz", (msg) => {
-      if (socket.data.screen && msg?.to) nsp.to(`p:${msg.to}`).emit("buzz", Math.min(400, Number(msg.ms) || 60));
+      if (isActive(socket) && msg?.to) nsp.to(`p:${msg.to}`).emit("buzz", Math.min(400, Number(msg.ms) || 60));
     });
 
     socket.on("screen:reset", () => {
-      if (!socket.data.screen) return;
+      if (!isActive(socket)) return;
       players = players.filter((p) => p.connected);
       sendPlayers();
     });
 
     socket.on("disconnect", () => {
+      if (socket.id === activeScreen) {
+        // ander tv-venster nog open? Dan neemt dat het automatisch over.
+        activeScreen = null;
+        const others = [...(nsp.adapter.rooms.get("screens") || [])].filter((id) => id !== socket.id);
+        if (others.length) { activeScreen = others[others.length - 1]; nsp.to(activeScreen).emit("screen:active"); }
+      }
       const p = players.find((x) => x.id === socket.data.pid);
       if (p && p.sid === socket.id) {
         p.connected = false;

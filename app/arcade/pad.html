@@ -69,10 +69,10 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
 (() => {
-  const EMOJIS = ["🐸","🦊","🐼","🐯","🐵","🦄","🐙","🐔","🐷","🐶","🐱","🐻","👽","🤖","👻","💀","🎃","🤠","😎","🥸","🦖","🐧","🦉","🍕"];
+  const EMOJIS = ["🐸","🦊","🐼","🐯","🐵","🦄","🐙","🐔","🐷","🐶","🐱","🐻","👽","🤖","👻","💀","🎃","🤠","😎","🦁","🦖","🐧","🦉","🍕"];
   const $ = (s) => document.querySelector(s);
   const main = $("#main");
-  let token = null, me = null, layout = null, connected = false, lastKey = "";
+  let token = null, me = null, layout = null, connected = false, lastKey = "", stopStick = null;
   const heldIds = new Set();
   const press = (id) => { heldIds.add(id); send(id, 1); };
   const release = (id) => { heldIds.delete(id); send(id, 0); };
@@ -117,6 +117,7 @@
     $("#jf").addEventListener("submit", (ev) => {
       ev.preventDefault();
       const name = $("#nm").value.trim() || "Speler";
+      try { const el = document.documentElement; if (el.requestFullscreen && matchMedia("(pointer:coarse)").matches) el.requestFullscreen({ navigationUI: "hide" }).catch(() => {}); } catch (_) {}
       saved = { name, emoji: pick }; join(name, pick);
     });
   }
@@ -169,7 +170,7 @@
       const now = performance.now();
       if (!force && now - last < 33 && Math.abs(x - lx) + Math.abs(y - ly) < 0.25) return;
       last = now; lx = x; ly = y;
-      socket.emit("in", { k: "stick", v: 1, x: +x.toFixed(2), y: +y.toFixed(2) });
+      (force ? socket : socket.volatile).emit("in", { k: "stick", v: 1, x: +x.toFixed(2), y: +y.toFixed(2) });
     };
     zone.addEventListener("pointerdown", (e) => {
       if (active !== null) return; e.preventDefault(); active = e.pointerId;
@@ -192,6 +193,8 @@
       base.style.display = knob.style.display = "none"; emit(0, 0, true);
     };
     zone.addEventListener("pointerup", end); zone.addEventListener("pointercancel", end);
+    // bij een nieuw scherm: stick loslaten en niet meer doorsturen
+    stopStick = () => { clearInterval(timer); active = null; lx = ly = 0; };
     container.appendChild(zone);
   }
 
@@ -200,6 +203,7 @@
     if (layout && key === lastKey && main.childElementCount) { layout = l; header(l); return; }
     lastKey = key;
     for (const id of Array.from(heldIds)) release(id);
+    if (stopStick) { stopStick(); stopStick = null; }
     if (layout && layout.type === "stick") socket.emit("in", { k: "stick", v: 1, x: 0, y: 0 });
     layout = l; header(l);
     main.innerHTML = "";

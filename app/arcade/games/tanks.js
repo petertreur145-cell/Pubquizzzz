@@ -29,7 +29,7 @@ ARCADE.register({
       tk.lives--; tk.inv = 1.4; A.sfx("boom"); A.shake(10); A.buzz(tk.p.id, 250);
       A.burst(tk.x, tk.y, ["#f97316", "#facc15", "#78716c", tk.p.color], 30, 380);
       if (by && by !== tk) by.kills++;
-      if (tk.lives <= 0) { tk.alive = false; tk.deathT = t; A.pad(tk.p.id, { type: "wait", emoji: "🪦", text: "Je tank is kapot!", sub: `${tk.kills} keer raak geschoten` }); }
+      if (tk.lives <= 0) { tk.alive = false; tk.deathT = t; A.pad(tk.p.id, { type: "wait", emoji: "💀", text: "Je tank is kapot!", sub: `${tk.kills} keer raak geschoten` }); }
     }
     const game = {
       over: false, ranking: null,
